@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "axios": "^0.17.1",
+    "axios-debug-log": "^0.4.0",
+    "cheerio": "^1.0.0-rc.2",
+    "random-fake-useragent": "^0.1.0"
+  }
+}
