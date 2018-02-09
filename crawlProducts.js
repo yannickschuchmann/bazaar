@@ -6,13 +6,17 @@ const randomUA = require('random-fake-useragent');
 const admin = require('./firebase');
 const db = admin.firestore();
 
+const getUserAgent = () => {
+  // get rid of opera
+  const browserTypes = ['Chrome', 'Internet Explorer', 'Firefox', 'Safari'];
+  const index = Math.floor(Math.random() * 4);
+  return randomUA.getRandom(browserTypes[index]);
+};
+
 const crawl = doc => {
-  const userAgent = randomUA.getRandom();
+  const userAgent = getUserAgent();
   const ASIN = doc.data().asin;
-  if (process.env.DEBUG) {
-    console.log('Scraping: ', ASIN);
-    console.log('User-Agent: ', userAgent);
-  }
+  console.log('User-Agent: ', userAgent);
 
   return new Promise((resolve, reject) => {
     request({
@@ -22,8 +26,13 @@ const crawl = doc => {
       },
       url: `https://www.amazon.de/s/?keywords=${ASIN}&sort=price-asc-rank`
     })
-      .then(({data}) => {
-        const product = extractProduct(data);
+      .then(async ({data}) => {
+        let product;
+        try {
+          product = await extractProduct(data);
+        } catch (e) {
+          throw e;
+        }
         product.timestamp = Date.now();
         resolve(product);
       })
@@ -35,10 +44,7 @@ const crawl = doc => {
 
 module.exports = async (event, context, callback) => {
   const products = [];
-  const snapshot = await db
-    .collection('products')
-    .limit(2)
-    .get();
+  const snapshot = await db.collection('products').get();
 
   snapshot.forEach(doc => products.push(doc));
 
@@ -62,7 +68,7 @@ module.exports = async (event, context, callback) => {
         .collection('products')
         .doc(product.id)
         .update(result);
-      console.log(`Saved ${ean}.`);
+      console.log(`Saved ${ean}.\n`);
 
       run();
     });

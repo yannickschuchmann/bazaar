@@ -2,7 +2,7 @@ const cheerio = require('cheerio');
 const fs = require('fs');
 
 const isComplete = product => {
-  return product.name && product.price && product.imageUrl;
+  return product.name && product.priceAmazon && product.imageUrl;
 };
 
 const getPrice = $el => {
@@ -10,8 +10,14 @@ const getPrice = $el => {
   if (!str) {
     str = $el.find('.s-price').text();
   }
+  if (!str) {
+    str = $el.find('.a-color-price').text();
+  }
+  if (!str) {
+    str = $el.text();
+  }
 
-  const match = str.replace(',', '.').match(/(\d*[,.]\d{1,2})/g);
+  const match = str.replace(',', '.').match(/(\d*[,.]\d{2})/g);
   if (match) {
     return parseFloat(match[0]);
   }
@@ -31,26 +37,25 @@ const extractProduct = html => {
   const $productRow = $('#result_0');
   let product;
 
-  try {
+  return new Promise((resolve, reject) => {
     product = {
       priceAmazon: getPrice($productRow),
       name: getName($productRow),
       imageUrl: getImageUrl($productRow)
     };
-  } catch (e) {
-    console.error(e);
-  }
 
-  if (!isComplete(product)) {
-    console.log('Product INCOMPLETE: Check HTML', product);
-    fs.writeFile('incomplete.html', html, err => {
-      if (err) throw err;
+    if (!isComplete(product)) {
+      console.log('Product INCOMPLETE: Check HTML', product);
+      fs.writeFile('incomplete.html', html, err => {
+        if (err) throw err;
 
-      console.log('HTML saved!');
-    });
-  }
-
-  return product;
+        console.log('HTML saved!');
+        reject(new Error('Product incomplete'));
+      });
+    } else {
+      resolve(product);
+    }
+  });
 };
 
 module.exports = extractProduct;
