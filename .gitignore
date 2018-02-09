@@ -4,3 +4,8 @@ jspm_packages
 
 # Serverless directories
 .serverless
+
+drive_secret.json
+firebase_secret.json
+
+incomplete.html

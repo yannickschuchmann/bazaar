@@ -2,7 +2,7 @@ const cheerio = require('cheerio');
 const fs = require('fs');
 
 const isComplete = product => {
-  return product.ean && product.name && product.price && product.imageUrl;
+  return product.name && product.price && product.imageUrl;
 };
 
 const getPrice = $el => {
@@ -11,12 +11,11 @@ const getPrice = $el => {
     str = $el.find('.s-price').text();
   }
 
-  return parseFloat(
-    str
-      .replace(',', '.')
-      .replace('€', '')
-      .replace('EUR ', '')
-  );
+  const match = str.replace(',', '.').match(/(\d*[,.]\d{1,2})/g);
+  if (match) {
+    return parseFloat(match[0]);
+  }
+  return false;
 };
 
 const getName = $el => {
@@ -27,24 +26,23 @@ const getImageUrl = $el => {
   return $el.find('img.s-access-image').attr('src');
 };
 
-const extractProduct = ean => html => {
+const extractProduct = html => {
   const $ = cheerio.load(html);
   const $productRow = $('#result_0');
   let product;
 
   try {
     product = {
-      price: getPrice($productRow),
+      priceAmazon: getPrice($productRow),
       name: getName($productRow),
-      imageUrl: getImageUrl($productRow),
-      ean
+      imageUrl: getImageUrl($productRow)
     };
   } catch (e) {
     console.error(e);
   }
 
   if (!isComplete(product)) {
-    console.log('Product INCOMPLETE: Check HTML');
+    console.log('Product INCOMPLETE: Check HTML', product);
     fs.writeFile('incomplete.html', html, err => {
       if (err) throw err;
 
