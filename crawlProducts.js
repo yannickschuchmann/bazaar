@@ -17,7 +17,7 @@ const crawl = doc => {
   const userAgent = getUserAgent();
   const ASIN = doc.data().asin;
   console.log('User-Agent: ', userAgent);
-
+  console.log(`Crawling ASIN: ${ASIN} ..`);
   return new Promise((resolve, reject) => {
     request({
       method: 'get',
@@ -30,24 +30,28 @@ const crawl = doc => {
         let product;
         try {
           product = await extractProduct(data);
+          product.timestamp = Date.now();
+          resolve(product);
         } catch (e) {
-          throw e;
+          reject(e);
         }
-        product.timestamp = Date.now();
-        resolve(product);
       })
-      .catch(error => {
-        throw error;
+      .catch(e => {
+        reject(e);
       });
   });
 };
 
 module.exports = async (event, context, callback) => {
   const products = [];
-  const snapshot = await db.collection('products').get();
+  const snapshot = await db
+    .collection('products')
+    .orderBy('asin', 'desc')
+    .get();
 
   snapshot.forEach(doc => products.push(doc));
 
+  console.log(`Products total: ${snapshot.docs.length}`);
   const run = () => {
     // Terminate after last product
     if (products.length === 0) {
@@ -55,23 +59,41 @@ module.exports = async (event, context, callback) => {
       callback(null, event);
       return;
     }
-
     const product = products.pop();
-    const ean = product.data().ean;
+    const productData = product.data();
 
-    console.log(`Start new Request for ${ean}`);
-    crawl(product).then(async result => {
-      console.log(`${ean} crawled`);
-
-      console.log(`Updating ${ean} ..`);
-      await db
-        .collection('products')
-        .doc(product.id)
-        .update(result);
-      console.log(`Saved ${ean}.\n`);
-
+    // skip already crawled products
+    if (typeof productData.priceAmazon !== 'undefined') {
       run();
-    });
+      return;
+    }
+
+    const asin = productData.asin;
+    const waitTime = Math.floor(Math.random() * 1250 + 750);
+    crawl(product)
+      .then(async result => {
+        console.log('------------------------------------------------------');
+        console.log(result);
+        console.log('------------------------------------------------------');
+        console.log('Crawled');
+
+        console.log(`DATABASE: Updating ${asin} ..`);
+        await db
+          .collection('products')
+          .doc(product.id)
+          .update(result);
+        console.log(`DATABASE: Updated.\n`);
+
+        setTimeout(() => {
+          run();
+        }, waitTime);
+      })
+      .catch(e => {
+        console.log(e);
+        setTimeout(() => {
+          run();
+        }, waitTime);
+      });
   };
   run();
 };

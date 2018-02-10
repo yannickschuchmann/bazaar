@@ -37,6 +37,10 @@ const extractProduct = html => {
   const $productRow = $('#result_0');
   let product;
 
+  if ($productRow.length === 0) {
+    return Promise.reject();
+  }
+
   return new Promise((resolve, reject) => {
     product = {
       priceAmazon: getPrice($productRow),
