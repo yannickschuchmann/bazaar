@@ -1,5 +1,6 @@
-const {crawl: crawlAmazon} = require('./amazon');
 const randomUA = require('random-fake-useragent');
+const Crawler = require('./base/crawler');
+const AmazonExtractor = require('./amazon/extractor');
 
 const admin = require('./firebase');
 const db = admin.firestore();
@@ -18,7 +19,12 @@ const crawl = doc => {
   console.log('User-Agent: ', userAgent);
   console.log(`Crawling ASIN: ${asin} ..`);
   return new Promise(async (resolve, reject) => {
-    const amazon = await crawlAmazon({asin, userAgent});
+    const crawlerAmazon = new Crawler({
+      extractor: AmazonExtractor,
+      url: `https://www.amazon.de/s/?keywords=${asin}&sort=price-asc-rank`,
+      userAgent
+    });
+    const amazon = await crawlerAmazon.run();
     // const geizhals = await crawlGeizhals({asin, userAgent});
 
     resolve({
