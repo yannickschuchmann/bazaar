@@ -2,6 +2,10 @@ const BaseExtractor = require('../base/extractor');
 const cheerio = require('cheerio');
 
 class Extractor extends BaseExtractor {
+  isComplete(product) {
+    return product.name && product.priceAmazon && product.imageUrl;
+  }
+
   getPrice() {
     const $el = this.$productRow;
     let str = $el.find('.a-offscreen').text();

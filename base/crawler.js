@@ -1,8 +1,7 @@
 const request = require('axios');
 require('axios-debug-log');
-const Extractor = require('./extractor');
 
-module.exports = class Crawler {
+module.exports = class BaseCrawler {
   constructor({extractor, url, userAgent}) {
     this.extractor = extractor;
     this.url = url;

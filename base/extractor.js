@@ -4,14 +4,13 @@ const fs = require('fs');
 class BaseExtractor {
   constructor(html, product) {
     this.html = html;
-    this.product = product;
     if (this.constructor == BaseExtractor) {
       throw new Error("Abstract classes can't be instantiated.");
     }
   }
 
   isComplete(product) {
-    return product.name && product.priceAmazon && product.imageUrl;
+    throw new Error('Method "isComplete()" Must be implemented');
   }
 
   getPrice() {
@@ -33,11 +32,7 @@ class BaseExtractor {
 
     if (this.$productRow.length === 0) {
       console.log('No product row found.');
-      return {
-        priceAmazon: null,
-        name: null,
-        imageUrl: null
-      };
+      return {};
     }
 
     return new Promise((resolve, reject) => {

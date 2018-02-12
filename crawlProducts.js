@@ -1,6 +1,8 @@
 const randomUA = require('random-fake-useragent');
-const Crawler = require('./base/crawler');
+const BaseCrawler = require('./base/crawler');
 const AmazonExtractor = require('./amazon/extractor');
+const GeizhalsExtractor = require('./geizhals/extractor');
+const GeizhalsCrawler = require('./geizhals/crawler');
 
 const admin = require('./firebase');
 const db = admin.firestore();
@@ -14,23 +16,35 @@ const getUserAgent = () => {
 
 const crawl = doc => {
   const userAgent = getUserAgent();
-  const {asin} = doc.data();
-  // asin = 'B001GKQ76O';
+  const data = doc.data();
+  const {asin} = data;
+  const crawls = data.crawls || [];
+
   console.log('User-Agent: ', userAgent);
   console.log(`Crawling ASIN: ${asin} ..`);
   return new Promise(async (resolve, reject) => {
-    const crawlerAmazon = new Crawler({
+    const crawlerAmazon = new BaseCrawler({
       extractor: AmazonExtractor,
       url: `https://www.amazon.de/s/?keywords=${asin}&sort=price-asc-rank`,
       userAgent
     });
+    const crawlerGeizhals = new GeizhalsCrawler({
+      extractor: GeizhalsExtractor,
+      url: `https://geizhals.de/?fs=${asin}`,
+      userAgent
+    });
     const amazon = await crawlerAmazon.run();
-    // const geizhals = await crawlGeizhals({asin, userAgent});
+    const geizhals = await crawlerGeizhals.run();
 
     resolve({
-      ...amazon,
-      // ...geizhals,
-      timestamp: Date.now()
+      crawls: [
+        {
+          ...geizhals,
+          ...amazon,
+          timestamp: Date.now()
+        },
+        ...crawls.slice(0, 4)
+      ]
     });
   });
 };
@@ -57,10 +71,10 @@ module.exports = async (event, context, callback) => {
     const productData = product.data();
 
     // skip already crawled products
-    if (typeof productData.priceAmazon !== 'undefined') {
-      run();
-      return;
-    }
+    // if (typeof productData.priceAmazon !== 'undefined') {
+    //   run();
+    //   return;
+    // }
 
     const asin = productData.asin;
     const waitTime = Math.floor(Math.random() * 1250 + 750);
