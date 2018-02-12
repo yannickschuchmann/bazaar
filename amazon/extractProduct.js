@@ -38,7 +38,12 @@ const extractProduct = html => {
   let product;
 
   if ($productRow.length === 0) {
-    return Promise.reject();
+    console.log('No product row found.');
+    return {
+      priceAmazon: null,
+      name: null,
+      imageUrl: null
+    };
   }
 
   return new Promise((resolve, reject) => {

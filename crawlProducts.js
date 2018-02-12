@@ -1,6 +1,4 @@
-const request = require('axios');
-require('axios-debug-log');
-const extractProduct = require('./amazon/extractProduct');
+const {crawl: crawlAmazon} = require('./amazon');
 const randomUA = require('random-fake-useragent');
 
 const admin = require('./firebase');
@@ -15,30 +13,19 @@ const getUserAgent = () => {
 
 const crawl = doc => {
   const userAgent = getUserAgent();
-  const ASIN = doc.data().asin;
+  const {asin} = doc.data();
+  // asin = 'B001GKQ76O';
   console.log('User-Agent: ', userAgent);
-  console.log(`Crawling ASIN: ${ASIN} ..`);
-  return new Promise((resolve, reject) => {
-    request({
-      method: 'get',
-      headers: {
-        'user-agent': userAgent
-      },
-      url: `https://www.amazon.de/s/?keywords=${ASIN}&sort=price-asc-rank`
-    })
-      .then(async ({data}) => {
-        let product;
-        try {
-          product = await extractProduct(data);
-          product.timestamp = Date.now();
-          resolve(product);
-        } catch (e) {
-          reject(e);
-        }
-      })
-      .catch(e => {
-        reject(e);
-      });
+  console.log(`Crawling ASIN: ${asin} ..`);
+  return new Promise(async (resolve, reject) => {
+    const amazon = await crawlAmazon({asin, userAgent});
+    // const geizhals = await crawlGeizhals({asin, userAgent});
+
+    resolve({
+      ...amazon,
+      // ...geizhals,
+      timestamp: Date.now()
+    });
   });
 };
 
@@ -47,6 +34,7 @@ module.exports = async (event, context, callback) => {
   const snapshot = await db
     .collection('products')
     .orderBy('asin', 'desc')
+    // .limit(1)
     .get();
 
   snapshot.forEach(doc => products.push(doc));
