@@ -4,7 +4,7 @@ const fs = require('fs');
 
 class Extractor extends BaseExtractor {
   isComplete(product) {
-    return product.name && product.priceGeizhals && product.imageUrl;
+    return product.priceGeizhals;
   }
 
   extract() {
@@ -32,11 +32,11 @@ class Extractor extends BaseExtractor {
 
       if (!this.isComplete(product)) {
         console.log('Product INCOMPLETE: Check HTML', product);
-        fs.writeFile('incompleteGeizhals.html', html, err => {
+        fs.writeFile('incompleteGeizhals.html', this.html, err => {
           if (err) throw err;
 
           console.log('HTML saved!');
-          reject(new Error('Product incomplete'));
+          resolve({});
         });
       } else {
         resolve(product);
@@ -63,7 +63,9 @@ class Extractor extends BaseExtractor {
   }
 
   getName() {
-    return this.$productRow.find('.arthdr span[itemprop="name"]').text();
+    return (
+      this.$productRow.find('.arthdr span[itemprop="name"]').text() || undefined
+    );
   }
 
   getImageUrl() {

@@ -53,7 +53,7 @@ module.exports = async (event, context, callback) => {
   const products = [];
   const snapshot = await db
     .collection('products')
-    .orderBy('asin', 'desc')
+    .orderBy('ean', 'desc')
     // .limit(1)
     .get();
 
@@ -83,7 +83,7 @@ module.exports = async (event, context, callback) => {
         console.log('------------------------------------------------------');
         console.log(result);
         console.log('------------------------------------------------------');
-        console.log('Crawled');
+        console.log(`Crawled ${productData.ean}`);
 
         console.log(`DATABASE: Updating ${asin} ..`);
         await db

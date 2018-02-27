@@ -18,15 +18,15 @@ class Crawler extends BaseCrawler {
 
         // find url to detail page of search result entry
         const $ = cheerio.load(searchResultsHtml);
-        const productUrl =
-          'https://geizhals.de/' +
-          $('#gh_content_wrapper table td a ').attr('href');
+        const path = $('#gh_content_wrapper table td a ').attr('href');
 
         // if no search results
-        if (!productUrl) {
+        if (!path) {
           resolve({});
           return;
         }
+
+        const productUrl = 'https://geizhals.de/' + path;
 
         // otherwise crawl detail page of search result entry
         const {data: detailHtml} = await request({
