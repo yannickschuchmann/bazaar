@@ -4,6 +4,7 @@ const fs = require('fs');
 class BaseExtractor {
   constructor(html, product) {
     this.html = html;
+    this.$ = cheerio.load(this.html);
     if (this.constructor == BaseExtractor) {
       throw new Error("Abstract classes can't be instantiated.");
     }
@@ -21,13 +22,16 @@ class BaseExtractor {
     throw new Error('Method "getName()" Must be implemented');
   }
 
+  getDetailUrl() {
+    throw new Error('Method "getDetailUrl()" Must be implemented');
+  }
+
   getImageUrl() {
     throw new Error('Method "getImageUrl()" Must be implemented');
   }
 
   extract() {
-    const $ = cheerio.load(this.html);
-    this.$productRow = $('#result_0');
+    this.$productRow = this.$('#result_0');
     let product;
 
     if (this.$productRow.length === 0) {
@@ -38,6 +42,7 @@ class BaseExtractor {
     return new Promise((resolve, reject) => {
       product = {
         priceAmazon: this.getPrice(),
+        amazonUrl: this.getDetailUrl(),
         name: this.getName(),
         imageUrl: this.getImageUrl()
       };

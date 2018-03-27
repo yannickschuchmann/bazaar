@@ -18,12 +18,12 @@ const getUserAgent = () => {
 const crawl = async doc => {
   const userAgent = getUserAgent();
   const data = doc.data();
-  const {asin} = data;
+  const {asin, ean} = data;
   const crawls = data.crawls || [];
 
   await renewIp();
   console.log('User-Agent: ', userAgent);
-  console.log(`Crawling ASIN: ${asin} ..`);
+  console.log(`Crawling ASIN: ${asin}, EAN: ${ean} ..`);
   return new Promise(async (resolve, reject) => {
     const crawlerAmazon = new BaseCrawler({
       extractor: AmazonExtractor,

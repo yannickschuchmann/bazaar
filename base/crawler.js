@@ -1,4 +1,5 @@
 const {request} = require('./request');
+const {wait} = require('./request');
 
 module.exports = class BaseCrawler {
   constructor({extractor, url, userAgent}) {
@@ -9,28 +10,39 @@ module.exports = class BaseCrawler {
   }
 
   run() {
-    return new Promise((resolve, reject) => {
-      this.request({
+    return new Promise(async (resolve, reject) => {
+      const {data} = await this.request({
         tor: false,
         method: 'get',
         headers: {
           'user-agent': this.userAgent
         },
         url: this.url
-      })
-        .then(async ({data}) => {
-          let product;
-          try {
-            const extractor = new this.extractor(data);
-            product = await extractor.extract();
-            resolve(product);
-          } catch (e) {
-            reject(e);
+      });
+      let product;
+      try {
+        const extractor = new this.extractor(data);
+        product = await extractor.extract();
+        if (product.amazonUrl) {
+          await wait(750, 2000);
+          const {data: detailHtml} = await this.request({
+            tor: false,
+            method: 'get',
+            headers: {
+              'user-agent': this.userAgent
+            },
+            url: product.amazonUrl
+          });
+          const detailExtractor = new this.extractor(detailHtml);
+          const salesRank = detailExtractor.getSalesRank();
+          if (salesRank) {
+            product.salesRank = salesRank;
           }
-        })
-        .catch(e => {
-          reject(e);
-        });
+        }
+        resolve(product);
+      } catch (e) {
+        reject(e);
+      }
     });
   }
 };

@@ -9,18 +9,24 @@ const ipCheckUrl = 'https://api.ipify.org';
 const lib = {
   request: ({url, tor = true, ...options}) =>
     new Promise((resolve, reject) => {
-      const req = tor ? tr.request : request;
-      const attempts = 0;
+      let attempts = 0;
       const repeat = () => {
+        const req = tor ? tr.request : request;
+        console.log('Request: ', url);
         req(url, options, async (err, res, body) => {
           if (!err && res.statusCode === 200) {
             resolve({data: body});
-          } else if (tor && attempts < 5) {
+          } else if (attempts < 5) {
             attempts++;
             console.log(`${attempts}. attempt failed. Retrying ...`);
-            await lib.renewIp();
+            if (tor) {
+              await lib.renewIp();
+            } else {
+              tor = true;
+            }
             repeat();
           } else {
+            console.log('ERROR: ', err, body);
             reject(err);
           }
         });
