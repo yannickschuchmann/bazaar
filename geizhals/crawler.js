@@ -1,6 +1,5 @@
-const request = require('axios');
 const cheerio = require('cheerio');
-require('axios-debug-log');
+const {wait} = require('../base/request');
 const BaseCrawler = require('../base/crawler');
 
 class Crawler extends BaseCrawler {
@@ -8,7 +7,8 @@ class Crawler extends BaseCrawler {
     return new Promise(async (resolve, reject) => {
       try {
         // get search results
-        const {data: searchResultsHtml} = await request({
+        await wait(750, 2000);
+        const {data: searchResultsHtml} = await this.request({
           method: 'get',
           headers: {
             'user-agent': this.userAgent
@@ -29,7 +29,8 @@ class Crawler extends BaseCrawler {
         const productUrl = 'https://geizhals.de/' + path;
 
         // otherwise crawl detail page of search result entry
-        const {data: detailHtml} = await request({
+        await wait(750, 2000);
+        const {data: detailHtml} = await this.request({
           method: 'get',
           headers: {
             'user-agent': this.userAgent
@@ -39,6 +40,7 @@ class Crawler extends BaseCrawler {
 
         const extractor = new this.extractor(detailHtml);
         const product = await extractor.extract();
+        await wait(750, 2000);
         resolve(product);
       } catch (e) {
         reject(e);

@@ -1,16 +1,17 @@
-const request = require('axios');
-require('axios-debug-log');
+const {request} = require('./request');
 
 module.exports = class BaseCrawler {
   constructor({extractor, url, userAgent}) {
     this.extractor = extractor;
     this.url = url;
     this.userAgent = userAgent;
+    this.request = request;
   }
 
   run() {
     return new Promise((resolve, reject) => {
-      request({
+      this.request({
+        tor: false,
         method: 'get',
         headers: {
           'user-agent': this.userAgent

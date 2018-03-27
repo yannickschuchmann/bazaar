@@ -1,5 +1,6 @@
 const randomUA = require('random-fake-useragent');
 const BaseCrawler = require('./base/crawler');
+const {renewIp, wait} = require('./base/request');
 const AmazonExtractor = require('./amazon/extractor');
 const GeizhalsExtractor = require('./geizhals/extractor');
 const GeizhalsCrawler = require('./geizhals/crawler');
@@ -14,12 +15,13 @@ const getUserAgent = () => {
   return randomUA.getRandom(browserTypes[index]);
 };
 
-const crawl = doc => {
+const crawl = async doc => {
   const userAgent = getUserAgent();
   const data = doc.data();
   const {asin} = data;
   const crawls = data.crawls || [];
 
+  await renewIp();
   console.log('User-Agent: ', userAgent);
   console.log(`Crawling ASIN: ${asin} ..`);
   return new Promise(async (resolve, reject) => {
@@ -77,7 +79,6 @@ module.exports = async (event, context, callback) => {
     // }
 
     const asin = productData.asin;
-    const waitTime = Math.floor(Math.random() * 1250 + 750);
     crawl(product)
       .then(async result => {
         console.log('------------------------------------------------------');
@@ -92,15 +93,13 @@ module.exports = async (event, context, callback) => {
           .update(result);
         console.log(`DATABASE: Updated.\n`);
 
-        setTimeout(() => {
-          run();
-        }, waitTime);
+        await wait(750, 2000);
+        run();
       })
-      .catch(e => {
+      .catch(async e => {
         console.log(e);
-        setTimeout(() => {
-          run();
-        }, waitTime);
+        await wait(750, 2000);
+        run();
       });
   };
   run();
