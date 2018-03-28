@@ -1,51 +1,61 @@
+const fs = require('fs-extra');
+
+const Json2csvParser = require('json2csv').Parser;
+const fields = [
+  'asin',
+  'ean',
+  'category',
+  'name',
+  'imageUrl',
+  'amazonUrl',
+  'salesRank',
+  'priceAmazon',
+  'priceGeizhals',
+  'priceDelta',
+  'offerUrl',
+  'timestamp'
+];
+const json2csvParser = new Json2csvParser({fields});
+
 const admin = require('../config/firebase');
 const db = admin.firestore();
 
-const getPriceDelta = ({priceAmazon, priceGeizhals}) =>
-  priceAmazon && priceGeizhals ? priceGeizhals - priceAmazon : '';
-
-const getSalesRank = ({salesRank = []}) =>
-  salesRank.map(({rank, category}) => `${rank} in ${category}`).join(',');
-
-const normalize = crawl => ({
-  ...crawl,
-  priceDelta: getPriceDelta(crawl),
-  salesRank: getSalesRank(crawl)
-});
+const h = {
+  getPriceDelta: ({priceAmazon, priceGeizhals}) =>
+    priceAmazon && priceGeizhals ? priceGeizhals - priceAmazon : '',
+  getSalesRank: ({salesRank = []}) =>
+    salesRank.map(({rank, category}) => `${rank} in ${category}`).join(','),
+  normalize: crawl => ({
+    ...crawl,
+    priceDelta: h.getPriceDelta(crawl),
+    salesRank: h.getSalesRank(crawl)
+  })
+};
 
 module.exports = async (event, context, callback) => {
+  const products = [];
   const snapshot = await db
     .collection('products')
     .orderBy('ean', 'asc')
-    .limit(1)
     .get();
-
-  const products = [];
-  const headers = [
-    'asin',
-    'ean',
-    'category',
-    'name',
-    'imageUrl',
-    'amazonUrl',
-    'salesRank',
-    'priceAmazon',
-    'priceGeizhals',
-    'priceDelta',
-    'offerUrl',
-    'timestamp'
-  ];
 
   snapshot.forEach(doc => {
     const {crawls = [], ...record} = doc.data();
-    const latestCrawl = crawls[0] ? normalize(crawls[0]) : {};
+    const latestCrawl = crawls[0] ? h.normalize(crawls[0]) : {};
     products.push({
       ...record,
       ...latestCrawl
     });
   });
 
-  console.log(products[0]);
+  const csv = json2csvParser.parse(products);
+  const path = `./exports/products_${Date.now()}.csv`;
+  try {
+    await fs.outputFile(path, csv, 'utf8');
+    console.log(`Saved to ${path}`);
+  } catch (err) {
+    console.error(err);
+  }
 
   callback();
 };

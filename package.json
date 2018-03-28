@@ -5,8 +5,10 @@
     "bluebird": "^3.5.1",
     "cheerio": "^1.0.0-rc.2",
     "firebase-admin": "^5.8.2",
+    "fs-extra": "^5.0.0",
     "google-spreadsheet": "^2.0.4",
     "googleapis": "27",
+    "json2csv": "^4.0.2",
     "random-fake-useragent": "^0.1.0",
     "tor-request": "^2.1.0"
   }
