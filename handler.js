@@ -1,4 +1,4 @@
 module.exports = {
-  crawlProducts: require('./crawlProducts'),
-  importProducts: require('./importProducts')
+  crawlProducts: require('./src/functions/crawlProducts'),
+  importProducts: require('./src/functions/importProducts')
 };

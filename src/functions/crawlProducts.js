@@ -1,11 +1,11 @@
 const randomUA = require('random-fake-useragent');
-const BaseCrawler = require('./base/crawler');
-const {renewIp, wait} = require('./base/request');
-const AmazonExtractor = require('./amazon/extractor');
-const GeizhalsExtractor = require('./geizhals/extractor');
-const GeizhalsCrawler = require('./geizhals/crawler');
+const BaseCrawler = require('../../libs/base/crawler');
+const {renewIp, wait} = require('../../libs/base/request');
+const AmazonExtractor = require('../../libs/amazon/extractor');
+const GeizhalsExtractor = require('../../libs/geizhals/extractor');
+const GeizhalsCrawler = require('../../libs/geizhals/crawler');
 
-const admin = require('./firebase');
+const admin = require('../config/firebase');
 const db = admin.firestore();
 
 const getUserAgent = () => {

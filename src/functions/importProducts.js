@@ -1,7 +1,7 @@
 const GoogleSpreadsheet = require('google-spreadsheet');
-const driveCreds = require('./drive_secret.json');
+const driveCreds = require('../config/drive_secret.json');
 
-const admin = require('./firebase');
+const admin = require('../config/firebase');
 const db = admin.firestore();
 const BATCH_LIMIT = 500;
 

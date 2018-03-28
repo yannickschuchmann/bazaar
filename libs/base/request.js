@@ -1,6 +1,6 @@
 const tr = require('tor-request');
 const request = require('request');
-const {password} = require('../tor_secret.json');
+const {password} = require('../../src/config/tor_secret.json');
 tr.TorControlPort.password = password;
 tr.setTorAddress('localhost', 9050);
 
