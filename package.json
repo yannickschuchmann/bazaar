@@ -6,6 +6,7 @@
     "cheerio": "^1.0.0-rc.2",
     "firebase-admin": "^5.8.2",
     "google-spreadsheet": "^2.0.4",
+    "googleapis": "27",
     "random-fake-useragent": "^0.1.0",
     "tor-request": "^2.1.0"
   }

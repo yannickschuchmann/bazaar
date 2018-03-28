@@ -8,5 +8,7 @@ provider:
 functions:
   crawlProducts:
     handler: handler.crawlProducts
+  exportProducts:
+    handler: handler.exportProducts
   importProducts:
     handler: handler.importProducts
