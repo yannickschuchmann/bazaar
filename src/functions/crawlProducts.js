@@ -53,11 +53,11 @@ const crawl = async doc => {
 
 module.exports = async (event, context, callback) => {
   const products = [];
-  const snapshot = await db
-    .collection('products')
-    .orderBy('ean', 'desc')
-    // .limit(1)
-    .get();
+  let snapshot = db.collection('products').orderBy('ean', 'asc');
+  if (event.startAt) {
+    snapshot = snapshot.startAt(event.startAt);
+  }
+  snapshot = await snapshot.get();
 
   snapshot.forEach(doc => products.push(doc));
 
@@ -69,7 +69,7 @@ module.exports = async (event, context, callback) => {
       callback(null, event);
       return;
     }
-    const product = products.pop();
+    const product = products.shift();
     const productData = product.data();
 
     // skip already crawled products

@@ -36,6 +36,11 @@ class BaseExtractor {
 
     if (this.$productRow.length === 0) {
       console.log('No product row found.');
+      const path = `noProductRowFound_${Date.now()}.html`;
+      fs.writeFile(path, this.html, err => {
+        if (err) throw err;
+        console.log(`HTML saved: ${path}`);
+      });
       return {};
     }
 
@@ -49,7 +54,7 @@ class BaseExtractor {
 
       if (!this.isComplete(product)) {
         console.log('Product INCOMPLETE: Check HTML', product);
-        fs.writeFile('incomplete.html', html, err => {
+        fs.writeFile('incomplete.html', this.html, err => {
           if (err) throw err;
 
           console.log('HTML saved!');

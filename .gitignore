@@ -11,6 +11,7 @@ tor_secret.json
 
 incomplete.html
 incompleteGeizhals.html
+noProductRowFound_*.html
 
 exports/*
 .DS_Store

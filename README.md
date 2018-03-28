@@ -25,3 +25,8 @@ serverless invoke local --function exportProducts
 ```
 
 This will fetch all records from Cloud Firestore and creates a new CSV out of it, located in `/exports` folder.
+
+One can also set a EAN as `startAt`:
+```shell
+serverless invoke local --function crawlProducts --data '{"startAt": "4002051691783"}'
+```
