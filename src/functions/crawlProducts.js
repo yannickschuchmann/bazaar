@@ -8,6 +8,9 @@ const GeizhalsCrawler = require('../../libs/geizhals/crawler');
 const admin = require('../config/firebase');
 const db = admin.firestore();
 
+const FROM = 1200;
+const TO = 4000;
+
 const getUserAgent = () => {
   // get rid of opera
   const browserTypes = ['Chrome', 'Internet Explorer', 'Firefox', 'Safari'];
@@ -93,12 +96,12 @@ module.exports = async (event, context, callback) => {
           .update(result);
         console.log(`DATABASE: Updated.\n`);
 
-        await wait(750, 2000);
+        await wait(FROM, TO);
         run();
       })
       .catch(async e => {
         console.log(e);
-        await wait(750, 2000);
+        await wait(FROM, TO);
         run();
       });
   };

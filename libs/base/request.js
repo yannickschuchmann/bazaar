@@ -11,7 +11,8 @@ const lib = {
     new Promise((resolve, reject) => {
       let attempts = 0;
       const repeat = () => {
-        const req = tor ? tr.request : request;
+        // temporary don't use tor
+        const req = false ? tr.request : request;
         console.log('Request: ', url);
         req(url, options, async (err, res, body) => {
           if (!err && res.statusCode === 200) {

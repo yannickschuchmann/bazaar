@@ -1,0 +1,2 @@
+https://github.com/agenda/agenda/issues/123
+https://github.com/agenda/agenda#example-project-structure

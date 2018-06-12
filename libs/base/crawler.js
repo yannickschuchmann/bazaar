@@ -1,6 +1,9 @@
 const {request} = require('./request');
 const {wait} = require('./request');
 
+const FROM = 1200;
+const TO = 4000;
+
 module.exports = class BaseCrawler {
   constructor({extractor, url, userAgent}) {
     this.extractor = extractor;
@@ -24,7 +27,7 @@ module.exports = class BaseCrawler {
         const extractor = new this.extractor(data);
         product = await extractor.extract();
         if (product.amazonUrl) {
-          await wait(750, 2000);
+          await wait(FROM, TO);
           const {data: detailHtml} = await this.request({
             tor: false,
             method: 'get',
