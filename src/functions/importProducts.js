@@ -29,7 +29,10 @@ module.exports = (event, context, callback) => {
           batch.set(ref, {
             ean: row.ean,
             asin: row.asin,
-            category: event.category
+            category: event.category,
+            cat1_rank: row.cat1rank,
+            catx_rank: row.catxrank,
+            searchrank: (row.searchrank || '0').trim()
           });
         }
 

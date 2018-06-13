@@ -56,7 +56,10 @@ const crawl = async doc => {
 
 module.exports = async (event, context, callback) => {
   const products = [];
-  let snapshot = db.collection('products').orderBy('ean', 'asc');
+  let snapshot = db
+    .collection('products')
+    .orderBy('cat1_rank', 'asc')
+    .orderBy('ean', 'asc');
   if (event.startAt) {
     snapshot = snapshot.startAt(event.startAt);
   }
